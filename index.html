@@ -63,6 +63,25 @@
   .secundario:hover{background:rgba(240,184,104,.12)}
   button:focus-visible{outline:3px solid var(--gold-light); outline-offset:2px}
   footer{text-align:center; color:var(--muted); opacity:.7; font:.8rem system-ui,sans-serif; margin-top:18px}
+
+  .diario{margin-top:26px; background:linear-gradient(180deg,rgba(13,47,77,.7),rgba(6,33,55,.85));
+    border:1px solid rgba(240,184,104,.4); border-radius:18px; padding:26px 24px 22px}
+  .diario h2{margin:0 0 4px; font-weight:normal; font-size:1.35rem; color:var(--gold)}
+  .diario .nota{margin:0 0 16px; font:.85rem/1.5 system-ui,sans-serif; color:var(--muted); opacity:.85}
+  .diario textarea{width:100%; min-height:120px; resize:vertical; padding:13px 14px; border-radius:12px;
+    border:1px solid rgba(240,184,104,.45); background:rgba(1,23,42,.7); color:var(--text);
+    font:1rem/1.6 system-ui,-apple-system,"Segoe UI",sans-serif}
+  .diario textarea::placeholder{color:#8fa0b3}
+  .diario textarea:focus{outline:2px solid var(--gold-light); outline-offset:1px}
+  .diario .fila{display:flex; gap:10px; margin-top:12px; flex-wrap:wrap; align-items:center}
+  .diario .estado{font:.85rem system-ui,sans-serif; color:var(--gold-light); min-height:1.2em}
+  .entradas{margin-top:20px; display:grid; gap:12px}
+  .entrada{border-left:3px solid var(--gold-soft); background:rgba(1,23,42,.45); border-radius:0 12px 12px 0; padding:12px 14px}
+  .entrada time{display:block; font:600 .75rem system-ui,sans-serif; letter-spacing:.08em; text-transform:uppercase; color:var(--gold)}
+  .entrada p{margin:6px 0 8px; white-space:pre-wrap; word-wrap:break-word; font:1rem/1.6 system-ui,sans-serif; color:var(--text)}
+  .entrada button{font-size:.8rem; padding:6px 12px; background:transparent; color:var(--muted); border:1px solid rgba(205,213,223,.35)}
+  .entrada button:hover{color:var(--gold); border-color:var(--gold-soft)}
+  .vacio{font:.95rem system-ui,sans-serif; color:var(--muted); opacity:.8; font-style:italic}
   @media (prefers-reduced-motion:reduce){.fade{animation:none}}
 </style>
 </head>
@@ -83,6 +102,18 @@
     <div class="acciones">
       <button class="primario" id="nuevo" type="button">Otro versículo</button>
     </div>
+  </section>
+
+  <section class="diario" aria-labelledby="dt">
+    <h2 id="dt">Mi diario de cambios</h2>
+    <p class="nota">Escribe aquí los cambios que has tenido gracias a tu manual ético. Se guarda solo en este dispositivo y nadie más lo ve.</p>
+    <textarea id="entrada" placeholder="Por ejemplo: esta semana dije la verdad aunque me costó, y me sentí en paz…" maxlength="3000"></textarea>
+    <div class="fila">
+      <button class="primario" id="guardar" type="button">Guardar</button>
+      <button class="secundario" id="respaldo" type="button">Descargar copia</button>
+      <span class="estado" id="estado" role="status"></span>
+    </div>
+    <div class="entradas" id="entradas"></div>
   </section>
 
   <footer>Texto en estilo Reina-Valera · Recarga la página o pulsa el botón para ver otro</footer>
@@ -176,6 +207,52 @@ function mostrar(i){
 
 $("nuevo").addEventListener("click", () => mostrar(elegir()));
 
+
+
+/* ---- Diario privado (localStorage) ---- */
+const KEY = "paginacristiana-diario-v1";
+let memoria = [];
+function leer(){ try{ const d = JSON.parse(localStorage.getItem(KEY) || "[]"); return Array.isArray(d) ? d : []; }catch(e){ return memoria; } }
+function escribir(a){ memoria = a; try{ localStorage.setItem(KEY, JSON.stringify(a)); return true; }catch(e){ return false; } }
+function fmt(ts){ return new Date(ts).toLocaleDateString("es-GT",{day:"numeric",month:"long",year:"numeric"}); }
+function aviso(t){ const e=$("estado"); e.textContent=t; clearTimeout(aviso.h); aviso.h=setTimeout(()=>e.textContent="",3000); }
+
+function pintar(){
+  const cont = $("entradas"); cont.textContent = "";
+  const lista = leer();
+  if(!lista.length){ const v=document.createElement("div"); v.className="vacio"; v.textContent="Todavía no has escrito nada."; cont.appendChild(v); return; }
+  lista.slice().reverse().forEach(en => {
+    const box=document.createElement("div"); box.className="entrada";
+    const t=document.createElement("time"); t.textContent=fmt(en.f);
+    const p=document.createElement("p"); p.textContent=en.t;
+    const b=document.createElement("button"); b.type="button"; b.textContent="Borrar";
+    let armado=false;
+    b.addEventListener("click",()=>{
+      if(!armado){ armado=true; b.textContent="¿Seguro? Pulsa otra vez"; setTimeout(()=>{armado=false; b.textContent="Borrar";},3000); return; }
+      escribir(leer().filter(x=>x.id!==en.id)); pintar();
+    });
+    box.append(t,p,b); cont.appendChild(box);
+  });
+}
+
+$("guardar").addEventListener("click",()=>{
+  const txt=$("entrada").value.trim();
+  if(!txt){ aviso("Escribe algo primero."); return; }
+  const lista=leer(); lista.push({id:Date.now()+"-"+Math.random().toString(36).slice(2,7), f:Date.now(), t:txt});
+  const ok=escribir(lista); $("entrada").value=""; pintar();
+  aviso(ok ? "Guardado ✓" : "No se pudo guardar en este navegador (modo privado).");
+});
+
+$("respaldo").addEventListener("click",()=>{
+  const lista=leer(); if(!lista.length){ aviso("No hay nada que descargar."); return; }
+  const txt=lista.map(e=>fmt(e.f)+"\n"+e.t).join("\n\n---\n\n");
+  const a=document.createElement("a");
+  a.href=URL.createObjectURL(new Blob([txt],{type:"text/plain;charset=utf-8"}));
+  a.download="mi-diario-de-cambios.txt"; document.body.appendChild(a); a.click(); a.remove();
+  setTimeout(()=>URL.revokeObjectURL(a.href),1000);
+});
+
+pintar();
 
 mostrar(elegir());
 </script>
