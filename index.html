@@ -78,7 +78,7 @@
   .entradas{margin-top:20px; display:grid; gap:12px}
   .entrada{border-left:3px solid var(--gold-soft); background:rgba(1,23,42,.45); border-radius:0 12px 12px 0; padding:12px 14px}
   .entrada time{display:block; font:600 .75rem system-ui,sans-serif; letter-spacing:.08em; text-transform:uppercase; color:var(--gold)}
-  .entrada p{margin:6px 0 8px; white-space:pre-wrap; word-wrap:break-word; font:1rem/1.6 system-ui,sans-serif; color:var(--text)}
+  .entrada p{margin:0 0 8px; white-space:pre-wrap; word-wrap:break-word; font:1rem/1.6 system-ui,sans-serif; color:var(--text)}
   .entrada button{font-size:.8rem; padding:6px 12px; background:transparent; color:var(--muted); border:1px solid rgba(205,213,223,.35)}
   .entrada button:hover{color:var(--gold); border-color:var(--gold-soft)}
   .vacio{font:.95rem system-ui,sans-serif; color:var(--muted); opacity:.8; font-style:italic}
@@ -110,7 +110,6 @@
     <textarea id="entrada" placeholder="Por ejemplo: esta semana dije la verdad aunque me costó, y me sentí en paz…" maxlength="3000"></textarea>
     <div class="fila">
       <button class="primario" id="guardar" type="button">Guardar</button>
-      <button class="secundario" id="respaldo" type="button">Descargar copia</button>
       <span class="estado" id="estado" role="status"></span>
     </div>
     <div class="entradas" id="entradas"></div>
@@ -223,7 +222,6 @@ function pintar(){
   if(!lista.length){ const v=document.createElement("div"); v.className="vacio"; v.textContent="Todavía no has escrito nada."; cont.appendChild(v); return; }
   lista.slice().reverse().forEach(en => {
     const box=document.createElement("div"); box.className="entrada";
-    const t=document.createElement("time"); t.textContent=fmt(en.f);
     const p=document.createElement("p"); p.textContent=en.t;
     const b=document.createElement("button"); b.type="button"; b.textContent="Borrar";
     let armado=false;
@@ -231,7 +229,7 @@ function pintar(){
       if(!armado){ armado=true; b.textContent="¿Seguro? Pulsa otra vez"; setTimeout(()=>{armado=false; b.textContent="Borrar";},3000); return; }
       escribir(leer().filter(x=>x.id!==en.id)); pintar();
     });
-    box.append(t,p,b); cont.appendChild(box);
+    box.append(p,b); cont.appendChild(box);
   });
 }
 
@@ -243,14 +241,6 @@ $("guardar").addEventListener("click",()=>{
   aviso(ok ? "Guardado ✓" : "No se pudo guardar en este navegador (modo privado).");
 });
 
-$("respaldo").addEventListener("click",()=>{
-  const lista=leer(); if(!lista.length){ aviso("No hay nada que descargar."); return; }
-  const txt=lista.map(e=>fmt(e.f)+"\n"+e.t).join("\n\n---\n\n");
-  const a=document.createElement("a");
-  a.href=URL.createObjectURL(new Blob([txt],{type:"text/plain;charset=utf-8"}));
-  a.download="mi-diario-de-cambios.txt"; document.body.appendChild(a); a.click(); a.remove();
-  setTimeout(()=>URL.revokeObjectURL(a.href),1000);
-});
 
 pintar();
 
