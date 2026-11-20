@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="theme-color" content="#062137">
+<title>Un versículo para hoy</title>
+<style>
+  :root{
+    --navy-deep:#01172a; --navy:#062137; --navy-soft:#0d2f4d;
+    --gold:#f0b868; --gold-soft:#e0b878; --gold-light:#f8d088; --gold-dark:#b9822f;
+    --text:#f3eee3; --muted:#cdd5df;
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0;min-height:100%}
+  body{
+    font-family: Georgia, "Times New Roman", serif;
+    color:var(--text);
+    background:
+      radial-gradient(700px 420px at 50% 38%, rgba(240,184,104,.16), transparent 70%),
+      radial-gradient(900px 500px at 50% 0%, #0d3050 0%, transparent 65%),
+      linear-gradient(180deg,var(--navy),var(--navy-deep));
+    background-attachment:fixed;
+    min-height:100vh; display:flex; align-items:center; justify-content:center; padding:24px;
+  }
+  main{width:100%; max-width:640px}
+  header{text-align:center; margin-bottom:22px}
+  header h1{
+    font-size:clamp(1.5rem,6vw,2.3rem); font-weight:normal; letter-spacing:.1em; text-transform:uppercase; margin:0;
+    background:linear-gradient(180deg,var(--gold-light),var(--gold) 55%,var(--gold-dark));
+    -webkit-background-clip:text; background-clip:text; color:transparent;
+  }
+  header .linea{display:flex; align-items:center; gap:12px; margin:12px auto 0; max-width:420px}
+  header .linea::before,header .linea::after{content:""; flex:1; height:1px; background:linear-gradient(90deg,transparent,var(--gold-soft))}
+  header .linea::after{transform:scaleX(-1)}
+  header .linea i{width:9px; height:9px; background:var(--gold); transform:rotate(45deg)}
+  header p{margin:10px 0 0; color:var(--muted); font-size:.98rem; font-style:italic}
+  .card{
+    background:linear-gradient(180deg,rgba(13,47,77,.85),rgba(6,33,55,.92));
+    border:1px solid rgba(240,184,104,.55); border-radius:18px; padding:34px 30px 26px;
+    box-shadow:0 0 0 4px rgba(240,184,104,.06), 0 24px 60px rgba(0,0,0,.5), 0 0 60px rgba(240,184,104,.08);
+    position:relative; overflow:hidden;
+  }
+  .card::before{content:"“"; position:absolute; top:-18px; left:16px; font-size:9rem; color:var(--gold); opacity:.14; line-height:1}
+  .tema{display:inline-block; font:600 .72rem/1 system-ui,sans-serif; letter-spacing:.14em; text-transform:uppercase;
+        color:var(--gold); border:1px solid var(--gold-soft); border-radius:999px; padding:6px 11px; margin-bottom:16px}
+  blockquote{margin:0; font-size:clamp(1.25rem,4.2vw,1.65rem); line-height:1.5; color:var(--text)}
+  .ref{margin-top:14px; font-weight:bold; color:var(--gold); font-size:1.05rem}
+  hr{border:0; height:1px; background:linear-gradient(90deg,transparent,var(--gold-soft),transparent); margin:22px 0 16px; opacity:.7}
+  .reflexion{font:1rem/1.65 system-ui,-apple-system,"Segoe UI",sans-serif; color:var(--muted)}
+  .reflexion b{color:var(--gold-light)}
+  .fade{animation:in .45s ease}
+  @keyframes in{from{opacity:0; transform:translateY(8px)} to{opacity:1; transform:none}}
+  .acciones{display:flex; gap:10px; margin-top:22px; flex-wrap:wrap}
+  button{
+    font:600 1rem system-ui,sans-serif; border-radius:12px; padding:13px 20px; cursor:pointer;
+    transition:transform .12s ease, filter .12s ease, background .12s ease;
+  }
+  button:active{transform:scale(.97)}
+  .primario{background:linear-gradient(180deg,var(--gold-light),var(--gold) 60%,var(--gold-dark)); color:#1a1305; border:0; flex:1 1 180px}
+  .primario:hover{filter:brightness(1.08)}
+  .secundario{background:transparent; color:var(--gold); border:1px solid var(--gold-soft)}
+  .secundario:hover{background:rgba(240,184,104,.12)}
+  button:focus-visible{outline:3px solid var(--gold-light); outline-offset:2px}
+  footer{text-align:center; color:var(--muted); opacity:.7; font:.8rem system-ui,sans-serif; margin-top:18px}
+  @media (prefers-reduced-motion:reduce){.fade{animation:none}}
+</style>
+</head>
+<body>
+<main>
+  <header>
+    <h1>Un versículo para hoy</h1>
+    <div class="linea"><i></i></div>
+    <p>Ética, trabajo, honestidad y justicia</p>
+  </header>
+
+  <section class="card" aria-live="polite">
+    <span class="tema" id="tema"></span>
+    <blockquote id="texto"></blockquote>
+    <div class="ref" id="ref"></div>
+    <hr>
+    <div class="reflexion" id="reflexion"></div>
+    <div class="acciones">
+      <button class="primario" id="nuevo" type="button">Otro versículo</button>
+    </div>
+  </section>
+
+  <footer>Texto en estilo Reina-Valera · Recarga la página o pulsa el botón para ver otro</footer>
+</main>
+
+<script>
+const V = [
+ // [tema, texto, cita, reflexión]
+ ["Honestidad","La integridad de los rectos los encaminará; mas la perversidad de los pérfidos los destruirá.","Proverbios 11:3","Ser íntegro no es sólo no mentir: es que lo que piensas, dices y haces sea lo mismo. Esa coherencia te guía cuando nadie te ve."],
+ ["Justicia","Oh hombre, él te ha declarado qué sea lo bueno, y qué pida de ti Jehová: solamente hacer juicio, y amar misericordia, y humillarte para andar con tu Dios.","Miqueas 6:8","Lo esencial cabe en tres cosas: actuar con justicia, tratar a otros con misericordia y mantenerse humilde."],
+ ["Honestidad","Los labios mentirosos son abominación a Jehová; mas los que hacen verdad son su contentamiento.","Proverbios 12:22","Una mentira pequeña también erosiona la confianza. Hoy, decir la verdad aunque cueste es una forma de respeto."],
+ ["Trabajo","Y todo lo que hagáis, hacedlo de corazón, como al Señor y no a los hombres.","Colosenses 3:23","Trabaja bien aunque nadie lo revise ni lo aplauda. La calidad de lo que haces dice quién eres."],
+ ["Honestidad","Por lo cual, desechando la mentira, hablad verdad cada cual con su prójimo; porque somos miembros los unos de los otros.","Efesios 4:25","Cuando engañas a alguien, dañas la comunidad de la que formas parte. La verdad nos mantiene unidos."],
+ ["Honestidad","El que camina en integridad, anda confiado; mas el que pervierte sus caminos, será quebrantado.","Proverbios 10:9","Quien no tiene nada que esconder duerme tranquilo. La honestidad también es una forma de paz interior."],
+ ["Bondad","Así que, todas las cosas que quisierais que los hombres hiciesen con vosotros, así también haced vosotros con ellos.","Mateo 7:12","Antes de actuar, ponte en el lugar del otro. Si no te gustaría recibirlo, no lo des."],
+ ["Ética","De más estima es el buen nombre que las muchas riquezas, y la buena fama más que la plata y el oro.","Proverbios 22:1","El dinero se gasta; la reputación se construye decisión por decisión y vale mucho más."],
+ ["Trabajo","El alma del perezoso desea, y nada alcanza; mas el alma de los diligentes será prosperada.","Proverbios 13:4","Desear no basta. Los resultados llegan a quien se levanta y hace su parte día tras día."],
+ ["Justicia","La justicia engrandece la nación; mas el pecado es afrenta de las naciones.","Proverbios 14:34","Un país mejora cuando cada persona actúa con justicia en lo pequeño: en la fila, en el trabajo, en la calle."],
+ ["Perseverancia","No nos cansemos, pues, de hacer bien; porque a su tiempo segaremos, si no desmayamos.","Gálatas 6:9","Hacer el bien a veces parece no dar fruto. Sigue: la cosecha llega a su tiempo."],
+ ["Ética","Mas sed hacedores de la palabra, y no tan solamente oidores, engañándoos a vosotros mismos.","Santiago 1:22","Saber qué es lo correcto no sirve de nada si no se practica. Elige hoy una acción concreta."],
+ ["Amor","La caridad es sufrida, es benigna; la caridad no tiene envidia, la caridad no hace sinrazón, no se ensancha.","1 Corintios 13:4","El amor se ve en la paciencia y en la amabilidad cotidiana, no en grandes discursos."],
+ ["Honestidad","Misericordia y verdad no te desamparen: átalas a tu cuello, escríbelas en la tabla de tu corazón.","Proverbios 3:3","Verdad sin compasión hiere; compasión sin verdad engaña. Lleva las dos juntas."],
+ ["Honestidad","Hablad verdad cada cual con su prójimo; juzgad verdad y juicio de paz en vuestras puertas.","Zacarías 8:16","Decidir con verdad y equidad es lo que construye paz en la casa, en el trabajo y en el barrio."],
+ ["Justicia","Mejor es lo poco con justicia, que la muchedumbre de frutos sin derecho.","Proverbios 16:8","Es preferible ganar poco de manera limpia que mucho de forma injusta. Lo limpio no se pudre."],
+ ["Ética","El peso falso es abominación a Jehová; mas la pesa cabal le agrada.","Proverbios 11:1","Cobrar lo justo, entregar lo prometido, medir con la misma vara para todos. La ética se nota en los detalles."],
+ ["Bondad","No pagando a nadie mal por mal; procurad lo bueno delante de todos los hombres.","Romanos 12:17","Responder con venganza sólo multiplica el daño. Corta la cadena con un gesto correcto."],
+ ["Paz","Si se puede hacer, cuanto es posible en vosotros, tened paz con todos los hombres.","Romanos 12:18","No siempre depende de ti, pero lo que sí depende de ti, hazlo: escucha, cede, reconcilia."],
+ ["Bondad","No seas vencido de lo malo; mas vence con el bien el mal.","Romanos 12:21","El mal no se derrota con más mal. Una respuesta amable desarma más que cien reproches."],
+ ["Perdón","Antes sed los unos con los otros benignos, misericordiosos, perdonándoos los unos a los otros.","Efesios 4:32","Guardar rencor pesa más para quien lo carga. Perdonar es soltar ese peso."],
+ ["Carácter","Mas el fruto del Espíritu es: caridad, gozo, paz, tolerancia, benignidad, bondad, fe, mansedumbre, templanza.","Gálatas 5:22-23","Ser buena persona es un carácter que se cultiva, como un árbol: paciencia, bondad y dominio propio."],
+ ["Ética","Por lo demás, hermanos, todo lo que es verdadero, todo lo honesto, todo lo justo, todo lo puro, todo lo amable, todo lo que es de buen nombre; si hay virtud alguna, si alguna alabanza, en esto pensad.","Filipenses 4:8","Lo que llena tu mente termina guiando tus acciones. Alimenta tus pensamientos con lo bueno."],
+ ["Humildad","La blanda respuesta quita la ira; mas la palabra áspera hace subir el furor.","Proverbios 15:1","Antes de contestar con dureza, respira. Una voz tranquila resuelve más de lo que crees."],
+ ["Amistad","En todo tiempo ama el amigo; y es como un hermano en tiempo de angustia.","Proverbios 17:17","Un buen amigo se queda cuando las cosas se ponen difíciles. Sé esa persona para alguien hoy."],
+ ["Honestidad","Mejor es el pobre que camina en su integridad, que el de perversos caminos, aunque sea rico.","Proverbios 28:6","El valor de una persona no se mide por lo que tiene sino por cómo lo consiguió y cómo lo usa."],
+ ["Justicia","Hacer justicia y juicio es a Jehová más agradable que sacrificio.","Proverbios 21:3","Tratar bien a las personas importa más que cualquier gesto religioso o formal."],
+ ["Trabajo","La mano negligente hace pobre; mas la mano de los diligentes enriquece.","Proverbios 10:4","Hacer las cosas a medias sale caro. La constancia diaria es la mejor inversión."],
+ ["Trabajo","Ve a la hormiga, oh perezoso, mira sus caminos, y sé sabio.","Proverbios 6:6","La hormiga no espera que nadie la mande: ve lo que toca y lo hace. Iniciativa y disciplina."],
+ ["Trabajo","Todo lo que te viniere a la mano para hacer, hazlo según tus fuerzas.","Eclesiastés 9:10","Si vas a hacerlo, hazlo con todas tus ganas. Mediocridad a propósito no existe."],
+ ["Humildad","El que encubre sus pecados no prosperará; mas el que los confiesa y se aparta, alcanzará misericordia.","Proverbios 28:13","Reconocer un error a tiempo vale más que taparlo. Quien admite y corrige, crece."],
+ ["Generosidad","El alma generosa será prosperada; y el que sacia, también será saciado.","Proverbios 11:25","Dar sin esperar nada abre puertas que el egoísmo cierra."],
+ ["Paz","Bienaventurados los pacificadores, porque ellos serán llamados hijos de Dios.","Mateo 5:9","No basta evitar el conflicto: construye puentes. Quien reconcilia deja el mundo mejor."],
+ ["Honestidad","Mas sea vuestro hablar: Sí, sí; no, no; porque lo que es más de esto, de mal procede.","Mateo 5:37","Que tu palabra baste. Si dices que sí, cumple; si es no, dilo con claridad y respeto."],
+ ["Ejemplo","Así alumbre vuestra luz delante de los hombres, para que vean vuestras buenas obras.","Mateo 5:16","Tus actos hablan más fuerte que tus palabras. Predica con el ejemplo."],
+ ["Bondad","Y como queréis que hagan los hombres con vosotros, haced también vosotros con ellos.","Lucas 6:31","La regla de oro cabe en una frase: trata a los demás como quieres ser tratado."],
+ ["Responsabilidad","El que es fiel en lo muy poco, también en lo más es fiel; y el que en lo muy poco es injusto, también en lo más es injusto.","Lucas 16:10","La honradez se entrena en lo pequeño: un cambio mal devuelto, una tarea entregada a tiempo."],
+ ["Amor","Un mandamiento nuevo os doy: Que os améis unos a otros; como yo os he amado, que también os améis unos a otros.","Juan 13:34","Amar es una decisión que se demuestra con servicio, tiempo y atención."],
+ ["Paz","Apártese del mal, y haga el bien; busque la paz, y sígala.","1 Pedro 3:11","La paz no llega sola: hay que buscarla y perseguirla con decisiones concretas."],
+ ["Generosidad","Y de hacer bien y de la comunicación no os olvidéis; porque de tales sacrificios se agrada Dios.","Hebreos 13:16","Compartir lo que tienes, tiempo, ayuda o conocimiento, es una de las formas más simples de hacer el bien."],
+ ["Responsabilidad","Y el que sabe hacer lo bueno, y no lo hace, le es pecado.","Santiago 4:17","Callar ante una injusticia o no ayudar cuando puedes también es una decisión. Actúa."],
+ ["Amor","Hijitos míos, no amemos de palabra ni de lengua, sino de hecho y en verdad.","1 Juan 3:18","Decir “te quiero” está bien; demostrarlo con acciones es lo que cuenta."],
+ ["Carácter","Sobre toda cosa guardada, guarda tu corazón; porque de él mana la vida.","Proverbios 4:23","Cuida lo que dejas entrar a tu mente y a tu corazón: de ahí salen tus decisiones."],
+ ["Trabajo","Encomienda a Jehová tus obras, y tus pensamientos serán afirmados.","Proverbios 16:3","Pon tus proyectos en buenas manos y trabaja con serenidad: el orden interior mejora el resultado."],
+ ["Honestidad","El justo camina en su integridad; sus hijos son dichosos después de él.","Proverbios 20:7","Tu honestidad deja una herencia: quienes vienen detrás aprenden de ella."],
+ ["Justicia","Aprended a hacer bien; buscad juicio, restituid al agraviado, haced justicia al huérfano, amparad a la viuda.","Isaías 1:17","La justicia incluye defender a quien no tiene voz. Mira a quién puedes proteger hoy."],
+ ["Bondad","Espera en Jehová, y haz bien; y habitarás en la tierra, y te apacentarás de la verdad.","Salmos 37:3","Haz el bien sin prisa y sin cansarte; la tranquilidad de conciencia es un buen pago."],
+ ["Honestidad","Integridad y rectitud me guarden, porque en ti he esperado.","Salmos 25:21","Pide ser guardado por la honestidad: te protege de atajos que luego se pagan caros."],
+ ["Justicia","El que oprime al pobre afrenta a su Hacedor; mas el que tiene misericordia del pobre, lo honra.","Proverbios 14:31","La manera en que tratas a quien no puede devolverte nada revela tu verdadero carácter."],
+ ["Generosidad","No detengas el bien de sus dueños, cuando tuvieres poder para hacerlo.","Proverbios 3:27","Si puedes ayudar o pagar lo que debes hoy, no lo pospongas. El bien tardío pierde valor."],
+ ["Humildad","Al que responde palabra antes de oír, le es fatuidad y oprobio.","Proverbios 18:13","Escuchar antes de opinar evita muchos errores. Entender primero, hablar después."],
+ ["Humildad","La soberbia del hombre le abate; pero al humilde de espíritu sustenta la honra.","Proverbios 29:23","Presumir te aleja de los demás; la humildad te acerca y te sostiene."],
+ ["Carácter","Vestíos, pues, como escogidos de Dios, santos y amados, de entrañable misericordia, de benignidad, de humildad, de mansedumbre, de paciencia.","Colosenses 3:12","El carácter se «viste» cada mañana: elige hoy ser paciente, amable y humilde."],
+ ["Perseverancia","Estad firmes y constantes, creciendo en la obra del Señor siempre, sabiendo que vuestro trabajo no es vano en el Señor.","1 Corintios 15:58","Tu esfuerzo honesto nunca se pierde, aunque hoy no veas el resultado."],
+ ["Honestidad","Procurando lo bueno, no sólo delante del Señor, sino también delante de los hombres.","2 Corintios 8:21","Ser honesto es que tu conducta sea limpia incluso a la vista de todos."],
+ ["Servicio","De cierto os digo que en cuanto lo hicisteis a uno de estos mis hermanos pequeñitos, a mí lo hicisteis.","Mateo 25:40","Cada gesto de ayuda a alguien en necesidad cuenta. Nada de lo que haces por otros es pequeño."]
+];
+
+const $ = id => document.getElementById(id);
+const card = document.querySelector(".card");
+let actual = -1;
+
+function ultimo(){ try{ return parseInt(localStorage.getItem("vers-ultimo"),10); }catch(e){ return NaN; } }
+function guardar(i){ try{ localStorage.setItem("vers-ultimo", String(i)); }catch(e){} }
+
+function elegir(){
+  let prev = actual >= 0 ? actual : ultimo();
+  let i;
+  do { i = Math.floor(Math.random()*V.length); } while (i === prev && V.length > 1);
+  return i;
+}
+
+function mostrar(i){
+  actual = i; guardar(i);
+  const [tema, texto, ref, refl] = V[i];
+  $("tema").textContent = tema;
+  $("texto").textContent = texto;
+  $("ref").textContent = "— " + ref;
+  $("reflexion").innerHTML = "<b>Reflexión:</b> ";
+  $("reflexion").appendChild(document.createTextNode(refl));
+  card.classList.remove("fade"); void card.offsetWidth; card.classList.add("fade");
+}
+
+$("nuevo").addEventListener("click", () => mostrar(elegir()));
+
+
+mostrar(elegir());
+</script>
+</body>
+</html>
